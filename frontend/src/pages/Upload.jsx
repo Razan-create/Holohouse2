@@ -94,7 +94,7 @@ export default function Upload() {
         minHeight: '100vh',
         padding: 24,
         background:
-          'linear-gradient(135deg, #16a34a 0%, #22c55e 40%, #bbf7d0 100%)', // grön bakgrund
+          'linear-gradient(135deg, #16a34a 0%, #22c55e 40%, #bbf7d0 100%)',
       }}
     >
       <div
@@ -107,7 +107,6 @@ export default function Upload() {
           boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
         }}
       >
-        {/* Hälsning */}
         <header style={{ marginBottom: 24 }}>
           <h1 style={{ marginBottom: 4 }}>
             Hej, {displayName} !
@@ -120,7 +119,6 @@ export default function Upload() {
           </p>
         </header>
 
-        {/* Uppladdningssektion */}
         <section
           style={{
             padding: 16,
@@ -138,7 +136,6 @@ export default function Upload() {
 
           <form onSubmit={handleUpload} style={{ display: 'grid', gap: 12 }}>
             <div>
-              {/* “Välj fil”-knapp (grön) */}
               <label
                 style={{
                   display: 'inline-block',
@@ -165,7 +162,6 @@ export default function Upload() {
               </span>
             </div>
 
-            {/* Ladda upp-knapp (grön) */}
             <button
               type="submit"
               disabled={loading}
@@ -188,7 +184,6 @@ export default function Upload() {
           </form>
         </section>
 
-        {/* Historiksektion */}
         <section>
           <h2>Historik</h2>
           <p style={{ color: '#64748b', fontSize: 14 }}>
@@ -246,7 +241,6 @@ export default function Upload() {
           )}
         </section>
 
-        {/* Nästa-knapp längst ner – går till Dashboard */}
         <div style={{ marginTop: 32, textAlign: 'right' }}>
           <button
             type="button"
@@ -268,5 +262,4 @@ export default function Upload() {
     </div>
   );
 }
-
 

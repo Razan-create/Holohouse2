@@ -11,8 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
+    "@google/generative-ai": "^0.24.1",
+    "ADcors": "^2.8.5",
+
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+
     "express": "^4.21.2",
+
     "multer": "^2.0.2"
   }
 }

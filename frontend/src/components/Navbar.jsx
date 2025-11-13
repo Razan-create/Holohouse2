@@ -6,11 +6,10 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  // Sidor där vi INTE vill visa länkarna Dashboard/Filer
   const hideMainLinks =
     location.pathname === '/login' ||
     location.pathname === '/register' ||
-    location.pathname === '/upload';   // ← lagt till
+    location.pathname === '/upload';
 
   return (
     <nav
@@ -22,7 +21,6 @@ export default function Navbar() {
         background: '#f8fafc',
       }}
     >
-      {/* Visa INTE Dashboard/Filer på inloggning, registrering eller upload-sidan */}
       {!hideMainLinks && (
         <>
           <Link to="/">Dashboard</Link>
@@ -47,5 +45,6 @@ export default function Navbar() {
     </nav>
   );
 }
+
 
 

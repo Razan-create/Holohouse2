@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { registerReq } from '../services/api';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
-  const [err, setErr] = useState('');   // <-- DU SAKNADE DEN HÄR!
-  const nav = useNavigate();
+  const [err, setErr] = useState('');
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +17,7 @@ export default function Register() {
     try {
       await registerReq(name, email, password);
       setMsg('Konto skapat! Du kan nu logga in.');
-      // Du kan aktivera denna om du vill, så skickas de till login:
+      // Om du vill skicka användaren vidare:
       // nav('/login');
     } catch (e) {
       console.error(e);
