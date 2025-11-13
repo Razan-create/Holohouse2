@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { listFiles, uploadFile, downloadFile } from '../services/api';
+import { uploadFile } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Upload() {
@@ -10,25 +10,7 @@ export default function Upload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
-  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const loadHistory = async () => {
-    if (!token) return;
-    try {
-      setErr('');
-      const files = await listFiles(token);
-      setHistory(files);
-    } catch (e) {
-      console.error(e);
-      setErr('Kunde inte hämta filhistorik (backend kanske inte är helt klar än).');
-    }
-  };
-
-  useEffect(() => {
-    loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0] || null;
@@ -59,30 +41,11 @@ export default function Upload() {
       await uploadFile(token, selectedFile);
       setMsg('Filen har laddats upp! Analysen skapas (PDF) av systemet.');
       setSelectedFile(null);
-      await loadHistory();
     } catch (e) {
       console.error(e);
       setErr('Uppladdning misslyckades. Kontrollera backend eller nätverk.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDownloadPdf = async (item) => {
-    try {
-      const res = await downloadFile(token, item.id);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download =
-        (item.resultPdfName || item.filename.replace(/\.\w+$/, '')) +
-        '_resultat.pdf';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
-      setErr('Kunde inte ladda ner PDF-resultatet.');
     }
   };
 
@@ -114,8 +77,10 @@ export default function Upload() {
           <p style={{ margin: 0, color: '#475569' }}>
             Här kan du ladda upp <strong>Excel-filer</strong> med miljödata (t.ex. CO₂,
             energi, vatten). Systemet analyserar filen och skapar en
-            <strong> PDF-rapport</strong> med resultatet. Under sidan ser du också en
-            historik över tidigare uppladdningar och genererade rapporter.
+            <strong> PDF-rapport</strong> med resultatet.
+            <br />
+            Din <strong>historik</strong> med uppladdade filer och rapporter hittar du
+            via länken <strong>Historik</strong> i menyn.
           </p>
         </header>
 
@@ -123,13 +88,13 @@ export default function Upload() {
           style={{
             padding: 16,
             borderRadius: 12,
-            background: '#f9fafb',
+            background: '#1f7162ff',
             boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
             marginBottom: 24,
           }}
         >
           <h2 style={{ marginTop: 0 }}>Ladda upp ny fil</h2>
-          <p style={{ color: '#64748b', fontSize: 14, marginTop: 0 }}>
+          <p style={{ color: '#154f28ff', fontSize: 14, marginTop: 0 }}>
             Endast Excel-filer accepteras (.xlsx, .xls). När filen laddats upp kommer
             backend göra analysen och skapa en PDF.
           </p>
@@ -157,7 +122,7 @@ export default function Upload() {
                   onChange={handleFileChange}
                 />
               </label>
-              <span style={{ marginLeft: 8, fontSize: 14 }}>
+              <span style={{ marginLeft: 8, fontSize: 14, color: 'white' }}>
                 {selectedFile ? selectedFile.name : 'Ingen fil vald ännu'}
               </span>
             </div>
@@ -179,66 +144,9 @@ export default function Upload() {
               {loading ? 'Laddar upp…' : 'Ladda upp fil'}
             </button>
 
-            {err && <small style={{ color: '#dc2626' }}>{err}</small>}
-            {msg && <small style={{ color: '#15803d' }}>{msg}</small>}
+            {err && <small style={{ color: '#fecaca' }}>{err}</small>}
+            {msg && <small style={{ color: '#bbf7d0' }}>{msg}</small>}
           </form>
-        </section>
-
-        <section>
-          <h2>Historik</h2>
-          <p style={{ color: '#64748b', fontSize: 14 }}>
-            Här visas filer som du (eller teamet) har laddat upp, samt länkar för att
-            hämta skapade PDF-rapporter.
-          </p>
-
-          {history.length === 0 ? (
-            <p style={{ fontStyle: 'italic', color: '#94a3b8' }}>
-              Inga filer har laddats upp ännu.
-            </p>
-          ) : (
-            <div style={{ display: 'grid', gap: 12 }}>
-              {history.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    padding: 12,
-                    borderRadius: 10,
-                    background: '#ffffff',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 500 }}>{item.filename}</div>
-                    <div style={{ fontSize: 12, color: '#94a3b8' }}>
-                      Uppladdad:{' '}
-                      {item.uploadedAt
-                        ? new Date(item.uploadedAt).toLocaleString('sv-SE')
-                        : 'okänt datum'}
-                    </div>
-                  </div>
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadPdf(item)}
-                      style={{
-                        padding: '6px 10px',
-                        borderRadius: 8,
-                        border: '1px solid #16a34a',
-                        background: '#bbf7d0',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                      }}
-                    >
-                      Ladda ner PDF
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </section>
 
         <div style={{ marginTop: 32, textAlign: 'right' }}>
@@ -262,4 +170,5 @@ export default function Upload() {
     </div>
   );
 }
+
 

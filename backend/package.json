@@ -4,21 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "dev": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "ADcors": "^2.8.5",
-
-    "dotenv": "^17.2.3",
+    "@google/generative-ai": "^0.11.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^5.1.0",
-
-    "express": "^4.21.2",
-
     "multer": "^2.0.2"
   }
 }

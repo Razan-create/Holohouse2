@@ -16,7 +16,7 @@ export default function Login() {
   try {
     const { token, user } = await loginReq(email, password);
     login(token, user);
-    nav('/');
+    nav('/upload'); 
   } catch (e) {
     console.error(e);
     setErr('Inloggning misslyckades: ' + (e.message || 'okänt fel'));

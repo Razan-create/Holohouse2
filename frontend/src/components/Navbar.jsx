@@ -11,19 +11,14 @@ export default function Navbar() {
     location.pathname === '/register' ||
     location.pathname === '/upload';
 
+  const isAuthPage =
+    location.pathname === '/login' || location.pathname === '/register';
+
   return (
-    <nav
-      style={{
-        display: 'flex',
-        gap: 12,
-        padding: 12,
-        borderBottom: '1px solid #eee',
-        background: '#f8fafc',
-      }}
-    >
+    <nav style={{ display: 'flex', gap: 12, padding: 12, borderBottom: '1px solid #eee' }}>
       {!hideMainLinks && (
         <>
-          <Link to="/">Dashboard</Link>
+          <Link to="/history">Historik</Link>
           <Link to="/upload">Filer</Link>
         </>
       )}
@@ -35,16 +30,19 @@ export default function Navbar() {
             <button onClick={logout}>Logga ut</button>
           </>
         ) : (
-          <>
-            <Link to="/login">Logga in</Link>
-            {' · '}
-            <Link to="/register">Registrera</Link>
-          </>
+          !isAuthPage && (
+            <>
+              <Link to="/login">Logga in</Link>
+              {' · '}
+              <Link to="/register">Registrera</Link>
+            </>
+          )
         )}
       </div>
     </nav>
   );
 }
+
 
 
 
