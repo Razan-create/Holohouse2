@@ -1,45 +1,108 @@
-import React, { useState } from 'react';
-import { registerReq } from '../services/api';
-import { Link } from 'react-router-dom';
+// src/pages/Register.jsx
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { registerReq } from "../services/api";
+import "./Login.css"; // återanvänd lyxiga stilen
 
-export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [msg, setMsg] = useState('');
-  const [err, setErr] = useState('');
+const Register = () => {
+  const navigate = useNavigate();
 
-  const onSubmit = async (e) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setMsg('');
-    setErr('');
+    setError("");
+    setSuccessMsg("");
 
     try {
+      // Skapa konto i backend
       await registerReq(name, email, password);
-      setMsg('Konto skapat! Du kan nu logga in.');
-      // Om du vill skicka användaren vidare:
-      // nav('/login');
-    } catch (e) {
-      console.error(e);
-      setErr('Registrering misslyckades: ' + (e.message || 'okänt fel'));
+
+      // Visa liten bekräftelse (valfritt)
+      setSuccessMsg("Konto skapat! Logga nu in med dina uppgifter.");
+
+      // Skicka användaren till inloggningssidan
+      setTimeout(() => {
+        navigate("/login");
+      }, 800);
+    } catch (err) {
+      console.error(err);
+      setError("Registrering misslyckades – försök igen.");
     }
   };
 
   return (
-    <div style={{ maxWidth: 360, margin: '80px auto' }}>
-      <h1>Registrera</h1>
+    <div className="login-root">
+      <div className="login-card">
+        <div className="login-logo-row">
+          <div className="login-logo-circle">🌱</div>
+          <div>
+            <div className="login-logo-text-small">Framtidens</div>
+            <div className="login-logo-text-main">Miljöportal</div>
+          </div>
+        </div>
 
-      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 12 }}>
-        <input placeholder="Namn" value={name} onChange={e => setName(e.target.value)} required />
-        <input placeholder="E-post" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input placeholder="Lösenord" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-        <button>Skapa konto</button>
-      </form>
+        <h1 className="login-title">Registrera</h1>
+        <p className="login-subtitle">
+          Skapa ett konto för att komma åt dina hållbarhetsdata och rapporter.
+        </p>
 
-      {err && <small style={{ color: '#d93025' }}>{err}</small>}
-      {msg && <small style={{ color: '#188038' }}>{msg}</small>}
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div>
+            <div className="login-label">Namn</div>
+            <input
+              className="login-input"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-      <p>Har du konto? <Link to="/login">Logga in</Link></p>
+          <div>
+            <div className="login-label">E-post</div>
+            <input
+              className="login-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <div className="login-label">Lösenord</div>
+            <input
+              className="login-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && <div className="login-error">{error}</div>}
+          {successMsg && (
+            <div className="login-error" style={{ color: "#15803d" }}>
+              {successMsg}
+            </div>
+          )}
+
+          <button type="submit" className="login-button">
+            Skapa konto
+          </button>
+        </form>
+
+        <div className="login-footer">
+          Har du konto? <Link to="/login">Logga in</Link>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Register;

@@ -1,0 +1,163 @@
+.history-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px 48px;
+  box-sizing: border-box;
+
+  background-image:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.12), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.10), transparent 55%);
+}
+
+.history-card {
+  width: 100%;
+  max-width: 980px;
+  background: radial-gradient(circle at top left, #f9f6ee 0%, #f3f1ea 45%, #eceae3 100%);
+  border-radius: 30px;
+  padding: 26px 28px 30px;
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(25, 70, 45, 0.25);
+  box-sizing: border-box;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.history-header h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.history-intro {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Återanvänd samma pill-button-stil som på Upload */
+
+.pill-button {
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: 0.17s ease;
+  white-space: nowrap;
+}
+
+.pill-button--secondary {
+  background: #ecfdf5;
+  color: #064e3b;
+  border: 1px solid #22c55e;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.pill-button--secondary:hover {
+  background: #bbf7d0;
+}
+
+.pill-button--ghost {
+  background: transparent;
+  color: #064e3b;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  box-shadow:
+    0 6px 14px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.pill-button--ghost:hover {
+  background: rgba(236, 253, 245, 0.8);
+}
+
+/* status & texter */
+
+.history-status {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.history-status--error {
+  background: rgba(185, 28, 28, 0.92);
+  color: #fee2e2;
+}
+
+.history-loading,
+.history-empty {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* tabell */
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.history-table thead {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.history-table tbody tr:nth-child(even) {
+  background: rgba(243, 244, 246, 0.75);
+}
+
+.history-table tbody tr:nth-child(odd) {
+  background: rgba(249, 250, 251, 0.85);
+}
+
+.history-no-report {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.history-download-btn {
+  font-size: 12px;
+  padding: 6px 14px;
+}
+
+@media (max-width: 768px) {
+  .history-card {
+    padding: 20px 18px 22px;
+    border-radius: 22px;
+  }
+
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-table {
+    font-size: 12px;
+  }
+}

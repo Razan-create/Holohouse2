@@ -1,48 +1,44 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
+import "./Navbar.css";
 
-export default function Navbar() {
+const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const hideMainLinks =
-    location.pathname === '/login' ||
-    location.pathname === '/register' ||
-    location.pathname === '/upload';
+  // Dölj navbar på login & register
+  if (location.pathname === "/login" || location.pathname === "/register") {
+    return null;
+  }
 
-  const isAuthPage =
-    location.pathname === '/login' || location.pathname === '/register';
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
-    <nav style={{ display: 'flex', gap: 12, padding: 12, borderBottom: '1px solid #eee' }}>
-      {!hideMainLinks && (
-        <>
-          <Link to="/history">Historik</Link>
-          <Link to="/upload">Filer</Link>
-        </>
-      )}
+    <header className="navbar">
+      <div className="navbar-inner">
 
-      <div style={{ marginLeft: 'auto' }}>
-        {user ? (
-          <>
-            <span style={{ marginRight: 8 }}>{user.name}</span>
-            <button onClick={logout}>Logga ut</button>
-          </>
-        ) : (
-          !isAuthPage && (
-            <>
-              <Link to="/login">Logga in</Link>
-              {' · '}
-              <Link to="/register">Registrera</Link>
-            </>
-          )
-        )}
+        {/* Vänster: emoji-logga + text */}
+        <div className="navbar-left">
+          <span className="navbar-logo">🌱</span>
+          <span className="navbar-title">FRAMTIDENS MILJÖPORTAL</span>
+        </div>
+
+        {/* Höger: användarnamn + logout */}
+        <div className="navbar-right">
+          <span className="navbar-username">{user?.name || "Användare"}</span>
+          <button className="navbar-logout-btn" onClick={handleLogout}>
+            Logga ut
+          </button>
+        </div>
+
       </div>
-    </nav>
+    </header>
   );
-}
+};
 
-
-
-
+export default Navbar;

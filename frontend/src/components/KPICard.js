@@ -1,24 +1,25 @@
-import React from 'react';
+// src/components/KPICard.js
+import React from "react";
 
-export default function KPICard({ label, value, trend }) {
-  const trendPositive = trend > 0;
-  const trendText = `${trendPositive ? '+' : ''}${trend}%`;
-  const trendColor = trendPositive ? '#d93025' : '#188038';
+const KPICard = ({ title, description, value, change }) => {
+  const hasData = value !== null && value !== undefined && value !== "";
 
   return (
-    <div style={{
-      padding: 16,
-      borderRadius: 12,
-      background: '#fff',
-      boxShadow: '0 1px 6px rgba(0,0,0,0.08)'
-    }}>
-      <div style={{ fontSize: 14, color: '#667085' }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 700, marginTop: 4 }}>
-        {new Intl.NumberFormat('sv-SE').format(value)}
-      </div>
-      <div style={{ fontSize: 12, color: trendColor, marginTop: 6 }}>
-        {trendText} senaste perioden
-      </div>
+    <div className="kpi-card">
+      <h3>{title}</h3>
+
+      {description && <p className="kpi-description">{description}</p>}
+
+      {hasData ? (
+        <>
+          <p className="kpi-value">{value}</p>
+          {change && <p className="kpi-change">{change}</p>}
+        </>
+      ) : (
+        <p className="kpi-placeholder">Ingen data ännu</p>
+      )}
     </div>
   );
-}
+};
+
+export default KPICard;
