@@ -1,63 +1,140 @@
-import React, { useEffect, useState } from 'react';
-import { getMetrics } from '../services/api';
-import KPICard from './KPICard';
-import Chart from './Chart';
-import DataTable from './DataTable';
+import React, { useEffect, useState } from "react";
+import { getMetrics } from "../services/api";
+import "./Dashboard.css";
+import { Link } from "react-router-dom";
+import Chart from "chart.js/auto";
+import Navbar from "./Navbar"; // ✅ NAVBAREN ÄR TILLBAKA
 
-export default function Dashboard() {
-  const [data, setData] = useState(null);
-  const [err, setErr] = useState('');
-  const [loading, setLoading] = useState(true);
+function Dashboard() {
+  const [metrics, setMetrics] = useState(null);
+  const [lineChart, setLineChart] = useState(null);
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      setErr('');
-      const res = await getMetrics();
-      setData(res);
-    } catch (e) {
-      setErr(e.message || 'Något gick fel');
-    } finally {
-      setLoading(false);
+  // Hämta data från backend
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getMetrics();
+        setMetrics(data);
+        renderChart(data);
+      } catch (error) {
+        console.error("Kunde inte ladda data", error);
+      }
     }
+
+    fetchData();
+  }, []);
+
+  // Rita linjediagram
+  const renderChart = (data) => {
+    const canvas = document.getElementById("lineChart");
+    if (!canvas) return;
+
+    // förstör gammal graf om den finns
+    if (lineChart) {
+      lineChart.destroy();
+    }
+
+    const labels = data?.chart?.labels || [];
+    const values = data?.chart?.values || [];
+
+    const newChart = new Chart(canvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Tidsserie",
+            data: values,
+            borderColor: "#1a5e3b",
+            borderWidth: 3,
+            pointRadius: 3,
+            tension: 0.35,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+    });
+
+    setLineChart(newChart);
   };
 
-  useEffect(() => { load(); }, []);
-
-  if (loading) return <p style={{ padding: 24 }}>Laddar…</p>;
-  if (err) return (
-    <div style={{ padding: 24, color: '#d93025' }}>
-      Fel: {err}
-      <div>
-        <button onClick={load} style={{ marginTop: 10, padding: '8px 12px', borderRadius: 8 }}>
-          Försök igen
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <div style={{ padding: 24, display: 'grid', gap: 20, background: '#f6f7fb', minHeight: '100vh' }}>
-      <header>
-        <h1 style={{ margin: 0 }}>Holohouse2 – Dashboard</h1>
-        <small style={{ color: '#64748b' }}>
-          Senast uppdaterad: {new Date(data.lastUpdated).toLocaleString('sv-SE')}
-        </small>
-      </header>
+    <>
+    
 
-      <section style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-        {data.kpis?.map(k => <KPICard key={k.key} {...k} />)}
-      </section>
+      {/* Själva dashboard-innehållet */}
+      <div className="dashboard-container">
+        {/* Header-rad */}
+        <div className="dashboard-header">
+          <h1>Miljödata – översikt</h1>
+          <p className="updated-text">
+            Senast uppdaterad:{" "}
+            {metrics?.updated || "inga filer har laddats upp ännu"}
+          </p>
 
-      <section>
-        <h2 style={{ margin: '8px 0' }}>Tidsserie</h2>
-        <Chart data={data.series} />
-      </section>
+          <Link to="/upload" className="back-button">
+            Till filer
+          </Link>
+        </div>
 
-      <section>
-        <h2 style={{ margin: '8px 0' }}>Detaljer (tabell)</h2>
-        <DataTable rows={data.series} />
-      </section>
-    </div>
+        {/* KPI-rad */}
+        <div className="kpi-row">
+          <div className="kpi-card">
+            <h3>CO₂ (ton)</h3>
+            <p className="kpi-label">Utsläpp av koldioxid</p>
+            <p className="kpi-value">
+              {metrics?.co2 ? (
+                metrics.co2
+              ) : (
+                <span className="no-data">Ingen data ännu</span>
+              )}
+            </p>
+          </div>
+
+          <div className="kpi-card">
+            <h3>Energi (MWh)</h3>
+            <p className="kpi-label">Energianvändning</p>
+            <p className="kpi-value">
+              {metrics?.energy ? (
+                metrics.energy
+              ) : (
+                <span className="no-data">Ingen data ännu</span>
+              )}
+            </p>
+          </div>
+
+          <div className="kpi-card">
+            <h3>Vatten (m³)</h3>
+            <p className="kpi-label">Vattenförbrukning</p>
+            <p className="kpi-value">
+              {metrics?.water ? (
+                metrics.water
+              ) : (
+                <span className="no-data">Ingen data ännu</span>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Tidsserie-box */}
+        <div className="graph-card">
+          <h3 className="graph-title">Tidsserie</h3>
+          <div className="graph-wrapper">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+
+        {/* Tabell-box */}
+        <div className="table-card">
+          <h3 className="table-title">Detaljer (tabell)</h3>
+          <p className="no-data">Ingen data ännu</p>
+        </div>
+      </div>
+    </>
   );
 }
+
+export default Dashboard;

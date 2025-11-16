@@ -1,30 +1,39 @@
-import React, { createContext, useContext, useState } from 'react';
+// src/AuthContext.jsx
+import React, { createContext, useContext, useState } from "react";
 
-const AuthCtx = createContext(null);
-export const useAuth = () => useContext(AuthCtx);
+const AuthContext = createContext(null);
 
-export default function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token') || '');
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  const login = (t, u) => {
-    setToken(t);
-    setUser(u);
-    localStorage.setItem('token', t);
-    localStorage.setItem('user', JSON.stringify(u));
+  const login = (userData) => {
+    const safeUser = userData || null;
+    setUser(safeUser);
+    if (safeUser) {
+      localStorage.setItem("user", JSON.stringify(safeUser));
+    } else {
+      localStorage.removeItem("user");
+    }
   };
 
   const logout = () => {
-    setToken('');
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    login(null);
   };
 
   return (
-    <AuthCtx.Provider value={{ token, user, login, logout, isAuthed: !!token }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
-    </AuthCtx.Provider>
+    </AuthContext.Provider>
   );
-}
+};
 
+export const useAuth = () => useContext(AuthContext);
+
+export default AuthContext;

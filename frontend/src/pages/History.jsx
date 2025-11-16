@@ -1,105 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../AuthContext';
-import { listFiles, downloadFile } from '../services/api';
+import React, { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
+import { listFiles, downloadFile } from "../services/api";
+import { Link } from "react-router-dom";
+import "./History.css";
 
 export default function History() {
-  const { token } = useAuth();
-  const [history, setHistory] = useState([]);
-  const [err, setErr] = useState('');
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const loadHistory = async () => {
-    if (!token) return;
-    try {
-      setErr('');
-      const files = await listFiles(token);
-      setHistory(files);
-    } catch (e) {
-      setErr('Kunde inte hämta historik.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    async function fetchFiles() {
+      try {
+        setLoading(true);
+        const data = await listFiles();
+        setFiles(data || []);
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError("Kunde inte hämta historik just nu.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFiles();
   }, []);
 
-  const handleDownloadPdf = async (item) => {
+  const handleDownload = async (fileId) => {
     try {
-      const res = await downloadFile(token, item.id);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download =
-        (item.resultPdfName || item.filename.replace(/\.\w+$/, '')) +
-        '_resultat.pdf';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
-      alert('Kunde inte ladda ner PDF.');
+      await downloadFile(fileId);
+    } catch (err) {
+      console.error(err);
+      alert("Kunde inte ladda ned filen.");
     }
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Historik</h1>
-      <p style={{ color: '#475569' }}>
-        Här ser du alla filer du har laddat upp och deras analyserade PDF-resultat.
-      </p>
-
-      {loading && <p>Laddar historik...</p>}
-      {err && <p style={{ color: 'red' }}>{err}</p>}
-
-      {!loading && history.length === 0 && (
-        <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
-          Du har inte laddat upp några filer än.
-        </p>
-      )}
-
-      <div style={{ display: 'grid', gap: 12 }}>
-        {history.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              padding: 12,
-              borderRadius: 10,
-              background: 'white',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
+    <>
+      
+      <div className="history-page">
+        <div className="history-card">
+          <div className="history-header">
             <div>
-              <div style={{ fontWeight: 600 }}>{item.filename}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>
-                Uppladdad:{' '}
-                {item.uploadedAt
-                  ? new Date(item.uploadedAt).toLocaleString('sv-SE')
-                  : 'okänt datum'}
-              </div>
+              <h2>Historik</h2>
+              <p className="history-intro">
+                Här ser du filer som du eller ditt team har laddat upp,
+                samt länkar för att ladda ned rapporter.
+              </p>
             </div>
-            <button
-              onClick={() => handleDownloadPdf(item)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: 8,
-                background: '#16a34a',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: '500',
-              }}
-            >
-              Ladda ner PDF
-            </button>
+            <Link to="/upload" className="pill-button pill-button--secondary">
+              Tillbaka till filer
+            </Link>
           </div>
-        ))}
+
+          {error && (
+            <div className="history-status history-status--error">
+              {error}
+            </div>
+          )}
+
+          {loading ? (
+            <p className="history-loading">Laddar historik…</p>
+          ) : files.length === 0 ? (
+            <p className="history-empty">
+              Inga filer har laddats upp ännu. Ladda upp din första fil
+              från sidan <strong>Filer</strong>.
+            </p>
+          ) : (
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>Filnamn</th>
+                  <th>Uppladdad</th>
+                  <th>Rapport</th>
+                </tr>
+              </thead>
+              <tbody>
+                {files.map((f) => (
+                  <tr key={f.id || f._id || f.name}>
+                    <td>{f.name || "Okänd fil"}</td>
+                    <td>{f.uploadedAt || f.date || "-"}</td>
+                    <td>
+                      {f.hasReport ? (
+                        <button
+                          className="pill-button pill-button--ghost history-download-btn"
+                          onClick={() => handleDownload(f.id || f._id)}
+                        >
+                          Ladda ned
+                        </button>
+                      ) : (
+                        <span className="history-no-report">
+                          Ingen rapport ännu
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,174 +1,147 @@
-import React, { useState } from 'react';
-import { useAuth } from '../AuthContext';
-import { uploadFile } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+// src/pages/Upload.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { uploadFile } from "../services/api";
+import { useAuth } from "../AuthContext";
+import "./Upload.css";
 
-export default function Upload() {
-  const { user, token } = useAuth();
-  const nav = useNavigate();
+const Upload = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [msg, setMsg] = useState('');
-  const [err, setErr] = useState('');
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // "success" eller "error"
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0] || null;
-    setSelectedFile(file);
-    setMsg('');
-    setErr('');
+    setFile(e.target.files[0] || null);
+    setMessage("");
+    setMessageType("");
   };
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    setMsg('');
-    setErr('');
-
-    if (!selectedFile) {
-      setErr('Välj en Excel-fil först.');
-      return;
-    }
-
-    const allowed =
-      selectedFile.name.endsWith('.xlsx') || selectedFile.name.endsWith('.xls');
-    if (!allowed) {
-      setErr('Endast Excel-filer (.xlsx eller .xls) är tillåtna.');
+  const handleUpload = async () => {
+    if (!file) {
+      setMessage("Välj en fil först.");
+      setMessageType("error");
       return;
     }
 
     try {
       setLoading(true);
-      await uploadFile(token, selectedFile);
-      setMsg('Filen har laddats upp! Analysen skapas (PDF) av systemet.');
-      setSelectedFile(null);
-    } catch (e) {
-      console.error(e);
-      setErr('Uppladdning misslyckades. Kontrollera backend eller nätverk.');
+      setMessage("");
+      setMessageType("");
+
+      await uploadFile(file);
+
+      setMessage("Filen laddades upp! Du kan nu se resultat i dashboard eller historik.");
+      setMessageType("success");
+      setFile(null);
+    } catch (err) {
+      console.error(err);
+      setMessage("Något gick fel vid uppladdningen. Försök igen.");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
   };
 
-  const displayName = user?.name || 'användare';
+  const displayName = user?.name || user?.email?.split("@")[0] || "vän";
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        padding: 24,
-        background:
-          'linear-gradient(135deg, #16a34a 0%, #22c55e 40%, #bbf7d0 100%)',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 900,
-          margin: '0 auto',
-          background: 'white',
-          borderRadius: 16,
-          padding: 24,
-          boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-        }}
-      >
-        <header style={{ marginBottom: 24 }}>
-          <h1 style={{ marginBottom: 4 }}>
-            Hej, {displayName} !
-          </h1>
-          <p style={{ margin: 0, color: '#475569' }}>
-            Här kan du ladda upp <strong>Excel-filer</strong> med miljödata (t.ex. CO₂,
-            energi, vatten). Systemet analyserar filen och skapar en
-            <strong> PDF-rapport</strong> med resultatet.
-            <br />
-            Din <strong>historik</strong> med uppladdade filer och rapporter hittar du
-            via länken <strong>Historik</strong> i menyn.
-          </p>
-        </header>
-
-        <section
-          style={{
-            padding: 16,
-            borderRadius: 12,
-            background: '#1f7162ff',
-            boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
-            marginBottom: 24,
-          }}
-        >
-          <h2 style={{ marginTop: 0 }}>Ladda upp ny fil</h2>
-          <p style={{ color: '#154f28ff', fontSize: 14, marginTop: 0 }}>
-            Endast Excel-filer accepteras (.xlsx, .xls). När filen laddats upp kommer
-            backend göra analysen och skapa en PDF.
-          </p>
-
-          <form onSubmit={handleUpload} style={{ display: 'grid', gap: 12 }}>
-            <div>
-              <label
-                style={{
-                  display: 'inline-block',
-                  padding: '8px 14px',
-                  borderRadius: 8,
-                  border: '1px solid #15803d',
-                  cursor: 'pointer',
-                  background: '#22c55e',
-                  color: 'white',
-                  fontSize: 14,
-                  fontWeight: 500,
-                }}
-              >
-                Välj fil
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                />
-              </label>
-              <span style={{ marginLeft: 8, fontSize: 14, color: 'white' }}>
-                {selectedFile ? selectedFile.name : 'Ingen fil vald ännu'}
-              </span>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: '8px 14px',
-                borderRadius: 8,
-                border: 'none',
-                background: '#16a34a',
-                color: 'white',
-                fontWeight: 500,
-                cursor: loading ? 'default' : 'pointer',
-                width: 'fit-content',
-              }}
-            >
-              {loading ? 'Laddar upp…' : 'Ladda upp fil'}
-            </button>
-
-            {err && <small style={{ color: '#fecaca' }}>{err}</small>}
-            {msg && <small style={{ color: '#bbf7d0' }}>{msg}</small>}
-          </form>
-        </section>
-
-        <div style={{ marginTop: 32, textAlign: 'right' }}>
+    <div className="upload-page">
+      <div className="upload-card">
+        {/* ÖVERSTA RADEN: hälsning + knapp till dashboard */}
+        <div className="upload-header-row">
+          <div>
+            <p className="upload-eyebrow">FILCENTER</p>
+            <h2 className="upload-title">Hej, {displayName}!</h2>
+            <p className="upload-description">
+              Här kan du ladda upp Excel-filer med miljödata (t.ex. CO₂, energi, vatten).
+              Systemet analyserar filen senare och skapar rapporter.
+            </p>
+          </div>
           <button
             type="button"
-            onClick={() => nav('/')}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 9999,
-              border: 'none',
-              background: '#16a34a',
-              color: 'white',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            className="upload-outline-btn"
+            onClick={() => navigate("/dashboard")}
           >
-            Nästa →
+            Visa dashboard
           </button>
         </div>
+
+        {/* STEG 1 – LADDA UPP FIL */}
+        <section className="upload-section primary">
+          <div className="section-header">
+            <span className="step-pill">Steg 1</span>
+            <div>
+              <h3 className="section-title">Ladda upp ny fil</h3>
+              <p className="section-subtitle">
+                Endast Excel-filer accepteras (<code>.xlsx</code>, <code>.xls</code>).
+              </p>
+            </div>
+          </div>
+
+          <div className="upload-controls">
+            <label className="file-input-label">
+              <span>Välj fil</span>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileChange}
+                hidden
+              />
+            </label>
+
+            <span className="selected-file">
+              {file ? file.name : "Ingen fil vald ännu"}
+            </span>
+
+            <button
+              type="button"
+              className="upload-btn"
+              onClick={handleUpload}
+              disabled={loading || !file}
+            >
+              {loading ? "Laddar upp..." : "Ladda upp fil"}
+            </button>
+          </div>
+
+          {message && (
+            <p
+              className={
+                messageType === "success"
+                  ? "upload-message success"
+                  : "upload-message error"
+              }
+            >
+              {message}
+            </p>
+          )}
+        </section>
+
+        {/* STEG 2 – HISTORIK */}
+        <section className="upload-section secondary">
+          <div>
+            <span className="step-pill subtle">Steg 2</span>
+            <h3 className="section-title">Se tidigare uppladdningar</h3>
+            <p className="section-subtitle">
+              På historiksidan hittar du alla filer du (eller teamet) laddat upp,
+              samt länkar till PDF-rapporter.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="history-btn"
+            onClick={() => navigate("/history")}
+          >
+            Gå till historik
+          </button>
+        </section>
       </div>
     </div>
   );
-}
+};
 
-
+export default Upload;
