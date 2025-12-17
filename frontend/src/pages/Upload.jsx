@@ -32,7 +32,8 @@ const Upload = () => {
       setMessage("");
       setMessageType("");
 
-      await uploadFile(file);
+      const token = localStorage.getItem('token');
+      await uploadFile(token, file);
 
       setMessage("Filen laddades upp! Du kan nu se resultat i dashboard eller historik.");
       setMessageType("success");

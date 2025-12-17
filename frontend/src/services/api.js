@@ -72,12 +72,26 @@ export function uploadFile(token, file) {
 }
 
 // Ladda ner fil
-export function downloadFile(token, id) {
-  return fetch(`${BASE_URL}/api/files/${id}/download`, {
+export async function downloadFile(token, id) {
+  const response = await fetch(`${BASE_URL}/api/files/${id}/download`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+  
+  if (!response.ok) {
+    throw new Error('Kunde inte ladda ner filen');
+  }
+  
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rapport-${id}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }
 
 

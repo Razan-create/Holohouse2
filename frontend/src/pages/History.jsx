@@ -13,7 +13,8 @@ export default function History() {
     async function fetchFiles() {
       try {
         setLoading(true);
-        const data = await listFiles();
+        const token = localStorage.getItem('token');
+        const data = await listFiles(token);
         setFiles(data || []);
         setError(null);
       } catch (err) {
@@ -28,7 +29,8 @@ export default function History() {
 
   const handleDownload = async (fileId) => {
     try {
-      await downloadFile(fileId);
+      const token = localStorage.getItem('token');
+      await downloadFile(token, fileId);
     } catch (err) {
       console.error(err);
       alert("Kunde inte ladda ned filen.");
@@ -77,14 +79,14 @@ export default function History() {
               </thead>
               <tbody>
                 {files.map((f) => (
-                  <tr key={f.id || f._id || f.name}>
-                    <td>{f.name || "Okänd fil"}</td>
-                    <td>{f.uploadedAt || f.date || "-"}</td>
+                  <tr key={f.id}>
+                    <td>{f.filename}</td>
+                    <td>{new Date(f.uploadedAt).toLocaleString('sv-SE')}</td>
                     <td>
-                      {f.hasReport ? (
+                      {f.id ? (
                         <button
                           className="pill-button pill-button--ghost history-download-btn"
-                          onClick={() => handleDownload(f.id || f._id)}
+                          onClick={() => handleDownload(f.id)}
                         >
                           Ladda ned
                         </button>
