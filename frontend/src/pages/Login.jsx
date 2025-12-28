@@ -34,6 +34,9 @@ const Login = () => {
       // LOGGA IN
       try {
         const userData = await loginReq(email, password);
+        localStorage.setItem("token", userData.token);
+        login(userData.user);
+        navigate("/");
         const apiUser = userData?.user || userData || {};
         const authUser = {
           name: apiUser.name || apiUser.fullName || name || "",

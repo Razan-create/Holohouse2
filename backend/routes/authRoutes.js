@@ -1,50 +1,120 @@
 // backend/routes/authRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const prisma = require("../prismaClient");
 
-// TEMP: "databas" i minnet bara för utveckling
-const users = [];
+/**
+ * POST /api/auth/register
+ */
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body || {};
 
-// POST /api/auth/register
-router.post('/register', (req, res) => {
-  const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Namn, e-post och lösenord krävs",
+      });
+    }
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'Namn, e-post och lösenord krävs' });
+    // kolla om user finns
+    const exists = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (exists) {
+      return res.status(409).json({
+        message: "E-post används redan",
+      });
+    }
+
+    // hash lösenord
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // spara i MySQL via Prisma
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+
+    return res.status(201).json({
+      message: "User created",
+      user,
+    });
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    return res.status(500).json({
+      message: "Fel vid registrering",
+    });
   }
-
-  const exists = users.find(u => u.email === email);
-  if (exists) {
-    return res.status(409).json({ message: 'E-post används redan' });
-  }
-
-  const newUser = {
-    id: users.length + 1,
-    name,
-    email,
-    password // OBS: bara för demo, ingen hash här!
-  };
-  users.push(newUser);
-
-  // skicka tillbaka användaren utan lösenord
-  const { password: _, ...safeUser } = newUser;
-  res.status(201).json({ message: 'User created', user: safeUser });
 });
 
-// POST /api/auth/login
-router.post('/login', (req, res) => {
-  const { email, password } = req.body;
+/**
+ * POST /api/auth/login
+ */
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
 
-  const user = users.find(u => u.email === email && u.password === password);
-  if (!user) {
-    return res.status(401).json({ message: 'Fel e-post eller lösenord' });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "E-post och lösenord krävs",
+      });
+    }
+
+    // hämta user från DB
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Fel e-post eller lösenord",
+      });
+    }
+
+    // jämför lösenord
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) {
+      return res.status(401).json({
+        message: "Fel e-post eller lösenord",
+      });
+    }
+
+    // skapa riktig JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    return res.status(500).json({
+      message: "Fel vid login",
+    });
   }
-
-  // Fake-token för nu – backend kan byta till riktig JWT senare
-  const token = 'dummy-token-' + user.id;
-  const { password: _, ...safeUser } = user;
-
-  res.json({ token, user: safeUser });
 });
 
 module.exports = router;
