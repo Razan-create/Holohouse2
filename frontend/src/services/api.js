@@ -1,5 +1,6 @@
 // src/services/api.js
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002';
+const BASE_URL = 'https://holohouse2-production.up.railway.app';
+
 
 async function api(path, { method = 'GET', token, body, isForm } = {}) {
   const headers = {};
