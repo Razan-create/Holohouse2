@@ -8,7 +8,7 @@ const fileRoutes = require('./routes/fileRoutes');   // 👈 ny rad
 const app = express();
 
 // middleware
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors());
 app.use(express.json());
 
 // enkel root
@@ -27,5 +27,5 @@ app.use('/api/files', fileRoutes);
 
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on ${PORT}`);
 });
