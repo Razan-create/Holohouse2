@@ -4,10 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node index.js",
-    "migrate:deploy": "prisma migrate deploy",
-    "postinstall": "prisma generate",
-    "start": "node index.js"
+    "dev": "node index.js"
   },
   "keywords": [],
   "author": "",
